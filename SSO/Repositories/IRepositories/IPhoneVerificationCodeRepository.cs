@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SSO.Repositories.IRepositories
 {
-    public interface IPhoneVerificationCodeRepository : IRepository<PhoneVerificationCode>
+    public interface IMobileVerificationCodeRepository : IRepository<MobileVerificationCode>
     {
     }
 }

@@ -17,7 +17,7 @@ namespace SSO.Models.SsoDbContext
         public virtual DbSet<RoleAction> RoleAction { get; set; }
         public virtual DbSet<RoleApplication> RoleApplication { get; set; }
         public virtual DbSet<UserRestrictedIp> UserRestrictedIp { get; set; }
-        public virtual DbSet<PhoneVerificationCode> PhoneVerificationCode { get; set; }
+        public virtual DbSet<MobileVerificationCode> MobileVerificationCode { get; set; }
         public virtual DbSet<HardwareTokenCode> HardwareTokenCode { get; set; }
         public virtual DbSet<SecurityLevel> SecurityLevel { get; set; }
         public virtual DbSet<SecurityMode> SecurityMode { get; set; }
@@ -49,7 +49,7 @@ namespace SSO.Models.SsoDbContext
             builder.ApplyConfiguration(new SecurityLevelModeConfiguration());
             builder.ApplyConfiguration(new SettingConfiguration());
             builder.ApplyConfiguration(new SessionConfiguration());
-            builder.ApplyConfiguration(new PhoneVerificationCodeConfiguration());
+            builder.ApplyConfiguration(new MobileVerificationCodeConfiguration());
             builder.ApplyConfiguration(new HardwareTokenCodeConfiguration());
             builder.ApplyConfiguration(new UserRestrictedIpConfiguration());
 

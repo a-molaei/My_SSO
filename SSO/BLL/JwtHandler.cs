@@ -103,7 +103,7 @@ namespace SSO.BLL
 
             return new JWT
             {
-                Token = token,
+                Access_Token = token,
                 Expires = exp
             };
         }

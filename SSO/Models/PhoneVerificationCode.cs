@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace SSO.Models
 {
-    public class PhoneVerificationCode
+    public class MobileVerificationCode
     {
         public int Id { get; set; }
         public string Code { get; set; }

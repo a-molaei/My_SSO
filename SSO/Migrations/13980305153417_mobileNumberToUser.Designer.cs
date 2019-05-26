@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SSO.Models.SsoDbContext;
 
 namespace SSO.Migrations
 {
     [DbContext(typeof(SsoDbContext))]
-    partial class SsoDbContextModelSnapshot : ModelSnapshot
+    [Migration("13980305153417_mobileNumberToUser")]
+    partial class mobileNumberToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -69,7 +71,7 @@ namespace SSO.Migrations
                     b.ToTable("HardwareTokenCodes","SSO");
                 });
 
-            modelBuilder.Entity("SSO.Models.MobileVerificationCode", b =>
+            modelBuilder.Entity("SSO.Models.PhoneVerificationCode", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -90,7 +92,7 @@ namespace SSO.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.ToTable("MobileVerificationCodes","SSO");
+                    b.ToTable("PhoneVerificationCodes","SSO");
                 });
 
             modelBuilder.Entity("SSO.Models.Role", b =>
@@ -339,10 +341,10 @@ namespace SSO.Migrations
                         .HasForeignKey("CreatedByUserId");
                 });
 
-            modelBuilder.Entity("SSO.Models.MobileVerificationCode", b =>
+            modelBuilder.Entity("SSO.Models.PhoneVerificationCode", b =>
                 {
                     b.HasOne("SSO.Models.User", "CreatedByUser")
-                        .WithMany("MobileVerificationCodes")
+                        .WithMany("PhoneVerificationCodes")
                         .HasForeignKey("CreatedByUserId");
                 });
 

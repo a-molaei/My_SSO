@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace SSO.Models.ModelConfigurations
 {
-    public class PhoneVerificationCodeConfiguration : IEntityTypeConfiguration<PhoneVerificationCode>
+    public class MobileVerificationCodeConfiguration : IEntityTypeConfiguration<MobileVerificationCode>
     {
-        public void Configure(EntityTypeBuilder<PhoneVerificationCode> builder)
+        public void Configure(EntityTypeBuilder<MobileVerificationCode> builder)
         {
-            builder.ToTable("PhoneVerificationCodes", "SSO");
+            builder.ToTable("MobileVerificationCodes", "SSO");
             builder.Property(b => b.MobileNumber).HasMaxLength(11);
             builder.HasOne(b => b.CreatedByUser)
-                .WithMany(b => b.PhoneVerificationCodes)
+                .WithMany(b => b.MobileVerificationCodes)
                 .HasForeignKey(b => b.CreatedByUserId);
         }
     }

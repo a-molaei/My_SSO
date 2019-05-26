@@ -1,4 +1,5 @@
-﻿using SSO.ViewModels;
+﻿using SSO.Models;
+using SSO.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,10 @@ namespace SSO.BLL
     public interface IUserManager
     {
         bool CreateUser(UserCreateDto userDto);
-        string Authenticate(string username, string password);
+        string VerifyPassword(string username, string password);
+        bool ChangePassword(User user, string newPassword);
+        bool ChangeSecurityStamp(User user);
+        bool SendVerificationCodeSms(User user);
+        bool VerifyVerificationCodeSms(User user, string code);
     }
 }

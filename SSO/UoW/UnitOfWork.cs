@@ -30,7 +30,7 @@ namespace SSO.UoW
             SessionRepository = new SessionRepository(_context);
             UserRestrictedIpRepository = new UserRestrictedIpRepository(_context);
             HardwareTokenCodeRepository = new HardwareTokenCodeRepository(_context);
-            PhoneVerificationCodeRepository = new PhoneVerificationCodeRepository(_context);
+            MobileVerificationCodeRepository = new MobileVerificationCodeRepository(_context);
             RoleGroupRepository = new RoleGroupRepository(_context);
         }
         public SsoDbContext GetDbContext()
@@ -83,7 +83,7 @@ namespace SSO.UoW
        public ISettingRepository SettingRepository { get; }
        public ISessionRepository SessionRepository { get; }
        public IHardwareTokenCodeRepository HardwareTokenCodeRepository { get; }
-       public IPhoneVerificationCodeRepository PhoneVerificationCodeRepository { get; }
+       public IMobileVerificationCodeRepository MobileVerificationCodeRepository { get; }
        public IUserRestrictedIpRepository UserRestrictedIpRepository { get; }
        public ISecurityLevelRepository SecurityLevelRepository { get; }
        public ISecurityModeRepository SecurityModeRepository { get; }

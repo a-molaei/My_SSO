@@ -22,7 +22,7 @@ namespace SSO.UoW
         ISettingRepository SettingRepository { get; }
         ISessionRepository SessionRepository { get; }
         IHardwareTokenCodeRepository HardwareTokenCodeRepository { get; }
-        IPhoneVerificationCodeRepository PhoneVerificationCodeRepository { get; }
+        IMobileVerificationCodeRepository MobileVerificationCodeRepository { get; }
         IUserRestrictedIpRepository UserRestrictedIpRepository { get; }
         ISecurityLevelRepository SecurityLevelRepository { get; }
         ISecurityModeRepository SecurityModeRepository { get; }

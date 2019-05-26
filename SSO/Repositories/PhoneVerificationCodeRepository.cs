@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace SSO.Repositories.IRepositories
 {
-    public class PhoneVerificationCodeRepository : Repository<PhoneVerificationCode>, IPhoneVerificationCodeRepository
+    public class MobileVerificationCodeRepository : Repository<MobileVerificationCode>, IMobileVerificationCodeRepository
     {
         private readonly SsoDbContext _context;
 
-        public PhoneVerificationCodeRepository(SsoDbContext context) : base(context)
+        public MobileVerificationCodeRepository(SsoDbContext context) : base(context)
         {
             _context = context;
         }

@@ -15,6 +15,7 @@ namespace SSO.Models.ModelConfigurations
             builder.Property(b => b.Id).HasMaxLength(128);
             builder.Property(b => b.SecurityStamp).HasMaxLength(128);
             builder.Property(b => b.UserName).HasMaxLength(10);
+            builder.Property(b => b.MobileNumber).HasMaxLength(11);
         }
     }
 }

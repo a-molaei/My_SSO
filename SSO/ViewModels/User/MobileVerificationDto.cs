@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace SSO.ViewModels
 {
-    public class JWT
+    public class MobileVerificationDto
     {
-        public string Access_Token { get; set; }
-        public long Expires { get; set; }
+        public string MobileNumber { get; set; }
+        public string Code { get; set; }
     }
 }
