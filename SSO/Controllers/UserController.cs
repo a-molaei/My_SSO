@@ -7,6 +7,8 @@ using SSO.ViewModels;
 using SSO.UoW;
 using SSO.BLL;
 using Microsoft.AspNetCore.Authorization;
+using SSO.Helper.Captcha;
+using SSO.ViewModels.Captcha;
 
 namespace SSO.Controllers
 {
@@ -61,12 +63,20 @@ namespace SSO.Controllers
         [Route("Login")]
         public IActionResult Login(UserCredentialsDto dto)
         {
-            var result = UserManager.VerifyPassword(dto.UserName, dto.Password);
-            if (result == "Failed")
+            var captchaValidated = CaptchaHelper.ValidateCaptcha(dto.CaptchaKey, dto.UserCaptchaInput);
+            if (captchaValidated == true)
             {
-                return Unauthorized();
+                var result = UserManager.VerifyPassword(dto.UserName, dto.Password);
+                if (result == "Failed")
+                {
+                    return Unauthorized();
+                }
+                return new ObjectResult(JwtHandler.Create(dto.UserName));
             }
-            return new ObjectResult(JwtHandler.Create(dto.UserName));
+            else
+            {
+                return StatusCode(400, new { Error = "کلید تصویر امنیتی معتبر نمی باشد" });
+            }
         }
 
         [HttpPost]
@@ -102,6 +112,13 @@ namespace SSO.Controllers
             else
                 return StatusCode(400, new { Error = "کد ارسالی مورد تأیید نمی باشد" });
         }
-
+        [HttpGet]
+        [Route("GetCaptcha")]
+        public IActionResult GetCaptcha()
+        {
+            CaptchaResponseDto dto = new CaptchaResponseDto();
+            dto = CaptchaHelper.GenerateCaptcha();
+            return Ok(dto);
+        }
     }
 }
