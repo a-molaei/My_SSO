@@ -16,6 +16,8 @@ using SSO.UoW;
 using SSO.BLL;
 using SSO.ViewModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace SSO
 {
@@ -35,6 +37,7 @@ namespace SSO
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IUserManager, UserManager>();
+            services.AddTransient<ILazyLoader, LazyLoader>();
 
             services.Configure<JwtSettings>(Configuration.GetSection("jwt"));
             services.AddSingleton<IJwtHandler, JwtHandler>();

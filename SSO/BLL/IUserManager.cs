@@ -15,5 +15,6 @@ namespace SSO.BLL
         bool ChangeSecurityStamp(User user);
         bool SendVerificationCodeSms(User user);
         bool VerifyVerificationCodeSms(User user, string code);
+
     }
 }
