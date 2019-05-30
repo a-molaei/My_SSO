@@ -73,19 +73,16 @@ namespace SSO.Controllers
                 {
                     return Unauthorized();
                 }
+                var userId = UnitOfWork.UserRepository.Find(u => u.UserName == dto.UserName).FirstOrDefault()?.Id;
                 AuthenticationStep auth = new AuthenticationStep()
                 {
                     SecurityLevelId = (int)AuthenticationSteps.Login,
-                    UserId = UserId,
+                    UserId = userId,
                     CreationDateTime = DateTime.Now
                 };
                 UnitOfWork.AuthenticationStepRepository.Add(auth);
                 UnitOfWork.Complete();
-                if(!IsTokenTimeValid)
-                {
-                    SecurityLevel = 0;
-                }
-                var nextStep = UserManager.GetAuthenticationNextStep(SecurityLevel, dto.RequestedSecurityLevel, User.Identity.Name, UserId);
+                var nextStep = UserManager.GetAuthenticationNextStep(SecurityLevel, dto.RequestedSecurityLevel, User.Identity.Name, userId);
                 if (nextStep == AuthenticationSteps.Done.ToString())
                 {
                     return new ObjectResult(JwtHandler.Create(dto.UserName, dto.RequestedSecurityLevel));
@@ -104,10 +101,6 @@ namespace SSO.Controllers
         [Route("GetAuthRoute")]
         public IActionResult GetAuthRoute(GetAuthRouteDto dto)
         {
-            if (!IsTokenTimeValid)
-            {
-                SecurityLevel = 0;
-            }
             var nextStep = UserManager.GetAuthenticationNextStep(SecurityLevel, dto.RequestedSecurityLevel, User.Identity.Name, UserId);
             if (nextStep == AuthenticationSteps.Done.ToString())
             {

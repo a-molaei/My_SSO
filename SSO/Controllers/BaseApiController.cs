@@ -27,11 +27,9 @@ namespace SSO.Controllers
         protected int SecurityLevel {
             get
             {
+                if (!IsTokenTimeValid)
+                    return 0;
                 return Convert.ToInt32(User.Claims.FirstOrDefault(u => u.Type == "security_level")?.Value ?? "0");
-            }
-            set
-            {
-                this.SecurityLevel = value;
             }
         }
         public bool IsTokenTimeValid
