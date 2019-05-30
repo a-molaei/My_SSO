@@ -101,14 +101,16 @@ namespace SSO.Controllers
         [Route("GetAuthRoute")]
         public IActionResult GetAuthRoute(GetAuthRouteDto dto)
         {
-            var nextStep = UserManager.GetAuthenticationNextStep(SecurityLevel, dto.RequestedSecurityLevel, User.Identity.Name, UserId);
-            if (nextStep == AuthenticationSteps.Done.ToString())
+            try
             {
-                return new ObjectResult(JwtHandler.Create(User.Identity.Name, dto.RequestedSecurityLevel));
-            }
-            else
-            {
+                var userId = UnitOfWork.UserRepository.Find(u => u.UserName == dto.UserName).FirstOrDefault()?.Id;
+                var nextStep = UserManager.GetAuthenticationNextStep(SecurityLevel, dto.RequestedSecurityLevel, User.Identity.Name, userId);
                 return Ok(new { NextStep = nextStep });
+
+            }
+            catch (Exception ex)
+            {
+                return Ok(ex);
             }
         }
         [HttpPost]

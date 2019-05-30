@@ -8,5 +8,6 @@ namespace SSO.ViewModels
     public class GetAuthRouteDto
     {
         public int RequestedSecurityLevel { get; set; }
+        public string UserName { get; set; }
     }
 }
