@@ -8,6 +8,7 @@ using SSO.Models;
 using Microsoft.AspNetCore.Identity;
 using SSO.Helper;
 using SSO.Helper.Sms;
+using SSO.Helper.CommonData;
 
 namespace SSO.BLL
 {
@@ -116,6 +117,40 @@ namespace SSO.BLL
             }
             else
                 return false;
+        }
+
+        public string GetAuthenticationNextStep(int currentSecurityLevel, int requestedSecurityLevel, string userName, string userId)
+        {
+            var requestedModes = _UnitOfWork.SecurityLevelModelRepository
+                .Find(s => s.SecurityLevelId == requestedSecurityLevel)
+                .Select(s => s.SecurityModeId)
+                .ToList();
+
+            var validatedModes = _UnitOfWork.SecurityLevelModelRepository
+                .Find(s => s.SecurityLevelId == currentSecurityLevel)
+                .Select(s => s.SecurityModeId)
+                .ToList();
+
+            var datetime = DateTime.Now.AddMinutes(-5);
+            var newlyAuthenticatedSteps = _UnitOfWork.AuthenticationStepRepository
+                .Find(a => a.UserId == userId && a.CreationDateTime >= datetime)
+                .Select(a => a.SecurityLevelId)
+                .ToList();
+
+            var remainingModes = requestedModes
+                .Except(validatedModes)
+                .Except(newlyAuthenticatedSteps)
+                .ToList();
+
+            if (remainingModes.Any())
+                return GetAuthenticationStepNameByIndex(remainingModes.FirstOrDefault());
+            else
+                return AuthenticationSteps.Done.ToString();
+        }
+        public string GetAuthenticationStepNameByIndex(int index)
+        {
+            AuthenticationSteps a = (AuthenticationSteps)index;
+            return a.ToString();
         }
     }
 }

@@ -32,6 +32,7 @@ namespace SSO.UoW
             HardwareTokenCodeRepository = new HardwareTokenCodeRepository(_context);
             MobileVerificationCodeRepository = new MobileVerificationCodeRepository(_context);
             RoleGroupRepository = new RoleGroupRepository(_context);
+            AuthenticationStepRepository = new AuthenticationStepRepository(_context);
         }
         public SsoDbContext GetDbContext()
         {
@@ -88,5 +89,6 @@ namespace SSO.UoW
        public ISecurityLevelRepository SecurityLevelRepository { get; }
        public ISecurityModeRepository SecurityModeRepository { get; }
        public ISecurityLevelModelRepository SecurityLevelModelRepository { get; }
+        public IAuthenticationStepRepository AuthenticationStepRepository { get; }
     }
 }

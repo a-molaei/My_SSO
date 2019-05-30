@@ -25,6 +25,7 @@ namespace SSO.Models.SsoDbContext
         public virtual DbSet<RoleGroup> RoleGroup { get; set; }
         public virtual DbSet<Session> Session { get; set; }
         public virtual DbSet<Setting> Setting { get; set; }
+        public virtual DbSet<AuthenticationStep> AuthenticationStep { get; set; }
 
 
 
@@ -52,6 +53,7 @@ namespace SSO.Models.SsoDbContext
             builder.ApplyConfiguration(new MobileVerificationCodeConfiguration());
             builder.ApplyConfiguration(new HardwareTokenCodeConfiguration());
             builder.ApplyConfiguration(new UserRestrictedIpConfiguration());
+            builder.ApplyConfiguration(new AuthenticationStepConfiguration());
 
 
 

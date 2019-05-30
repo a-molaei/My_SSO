@@ -15,6 +15,9 @@ namespace SSO.BLL
         bool ChangeSecurityStamp(User user);
         bool SendVerificationCodeSms(User user);
         bool VerifyVerificationCodeSms(User user, string code);
+        string GetAuthenticationNextStep(int currentSecurityLevel, int requestedSecurityLeve, string userName, string userId);
+        string GetAuthenticationStepNameByIndex(int index);
+
 
     }
 }

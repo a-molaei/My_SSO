@@ -9,6 +9,8 @@ using SSO.BLL;
 using Microsoft.AspNetCore.Authorization;
 using SSO.Helper.Captcha;
 using SSO.ViewModels.Captcha;
+using SSO.Helper.CommonData;
+using SSO.Models;
 
 namespace SSO.Controllers
 {
@@ -71,14 +73,51 @@ namespace SSO.Controllers
                 {
                     return Unauthorized();
                 }
-                return new ObjectResult(JwtHandler.Create(dto.UserName));
+                AuthenticationStep auth = new AuthenticationStep()
+                {
+                    SecurityLevelId = (int)AuthenticationSteps.Login,
+                    UserId = UserId,
+                    CreationDateTime = DateTime.Now
+                };
+                UnitOfWork.AuthenticationStepRepository.Add(auth);
+                UnitOfWork.Complete();
+                if(!IsTokenTimeValid)
+                {
+                    SecurityLevel = 0;
+                }
+                var nextStep = UserManager.GetAuthenticationNextStep(SecurityLevel, dto.RequestedSecurityLevel, User.Identity.Name, UserId);
+                if (nextStep == AuthenticationSteps.Done.ToString())
+                {
+                    return new ObjectResult(JwtHandler.Create(dto.UserName, dto.RequestedSecurityLevel));
+                }
+                else
+                {
+                    return Ok(new { NextStep = nextStep});
+                }
             }
             else
             {
                 return StatusCode(400, new { Error = "کلید تصویر امنیتی معتبر نمی باشد" });
             }
         }
-
+        [HttpPost]
+        [Route("GetAuthRoute")]
+        public IActionResult GetAuthRoute(GetAuthRouteDto dto)
+        {
+            if (!IsTokenTimeValid)
+            {
+                SecurityLevel = 0;
+            }
+            var nextStep = UserManager.GetAuthenticationNextStep(SecurityLevel, dto.RequestedSecurityLevel, User.Identity.Name, UserId);
+            if (nextStep == AuthenticationSteps.Done.ToString())
+            {
+                return new ObjectResult(JwtHandler.Create(User.Identity.Name, dto.RequestedSecurityLevel));
+            }
+            else
+            {
+                return Ok(new { NextStep = nextStep });
+            }
+        }
         [HttpPost]
         [Route("SendVerificationCodeSms")]
         public IActionResult SendVerificationCodeSms(MobileVerificationDto dto)
@@ -107,7 +146,7 @@ namespace SSO.Controllers
             bool result = UserManager.VerifyVerificationCodeSms(user, dto.Code);
             if (result)
             {
-                return new ObjectResult(JwtHandler.Create(user.UserName));
+                return new ObjectResult(JwtHandler.Create(user.UserName, dto.SecurityLevel));
             }
             else
                 return StatusCode(400, new { Error = "کد ارسالی مورد تأیید نمی باشد" });

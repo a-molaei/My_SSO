@@ -9,5 +9,6 @@ namespace SSO.ViewModels
     {
         public string MobileNumber { get; set; }
         public string Code { get; set; }
+        public int SecurityLevel { get; set; }
     }
 }

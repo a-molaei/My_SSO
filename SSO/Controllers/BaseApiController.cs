@@ -24,5 +24,37 @@ namespace SSO.Controllers
         protected IUnitOfWork UnitOfWork => _UnitOfWork;
         protected IUserManager UserManager => _UserManager;
         protected IJwtHandler JwtHandler => _JwtHandler;
+        protected int SecurityLevel {
+            get
+            {
+                return Convert.ToInt32(User.Claims.FirstOrDefault(u => u.Type == "security_level")?.Value ?? "0");
+            }
+            set
+            {
+                this.SecurityLevel = value;
+            }
+        }
+        public bool IsTokenTimeValid
+        {
+            get
+            {
+                var nowUtc = DateTime.UtcNow;
+                var centuryBegin = new DateTime(1970, 1, 1);
+                var currentSeconds = (long)(new TimeSpan(nowUtc.Ticks - centuryBegin.Ticks).TotalSeconds);
+                var nbf = Convert.ToInt64(User.Claims.FirstOrDefault(u => u.Type == "nbf")?.Value);
+                var exp = Convert.ToInt64(User.Claims.FirstOrDefault(u => u.Type == "exp")?.Value);
+                if (currentSeconds >= nbf && currentSeconds <= exp)
+                    return true;
+                else
+                    return false;
+            }
+        }
+        public string UserId
+        {
+            get
+            {
+                return UnitOfWork.UserRepository.Find(u => u.UserName == User.Identity.Name).FirstOrDefault().Id;
+            }
+        }
     }
 }

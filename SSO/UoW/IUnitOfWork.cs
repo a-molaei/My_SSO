@@ -27,7 +27,7 @@ namespace SSO.UoW
         ISecurityLevelRepository SecurityLevelRepository { get; }
         ISecurityModeRepository SecurityModeRepository { get; }
         ISecurityLevelModelRepository SecurityLevelModelRepository { get; }
-
+        IAuthenticationStepRepository AuthenticationStepRepository { get; }
 
 
 

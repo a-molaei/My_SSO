@@ -80,7 +80,7 @@ namespace SSO.BLL
             };
         }
 
-        public JWT Create(string userId)
+        public JWT Create(string userId, int securityLevel)
         {
             var nowUtc = DateTime.UtcNow;
             var expires = nowUtc.AddDays(_settings.ExpiryDays);
@@ -92,6 +92,7 @@ namespace SSO.BLL
             {
                 {"sub", userId},
                 {"unique_name", userId},
+                {"security_level", securityLevel},
                 {"iss", issuer},
                 {"iat", now},
                 {"nbf", now},
