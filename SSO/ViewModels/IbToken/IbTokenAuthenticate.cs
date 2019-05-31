@@ -9,6 +9,7 @@ namespace SSO.ViewModels.IbToken
     {
         public int[] RandomKeys { get; set; }
         public string TokenResult { get; set; }
+        public int RequestedSecurityLevel { get; set; }
         public string UserName { get; set; }
         public string DeviceId { get; set; }
     }

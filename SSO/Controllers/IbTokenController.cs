@@ -8,6 +8,8 @@ using SSO.BLL;
 using SSO.Helper.IbToken;
 using SSO.ViewModels.IbToken;
 using System.Text;
+using SSO.Models;
+using SSO.Helper.CommonData;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -35,8 +37,7 @@ namespace SSO.Controllers
                 randomKeys[i] = random.Next(255);
 
             var res = TokenUtility.Fix8ArrayToHex(randomKeys);
-           // return res;
-            return Ok(new { RandomKey = res, Random = randomKeys });
+            return Ok(new { RandomHexKey = res, RandomKeys = randomKeys });
         }
 
         [HttpPost]
@@ -46,11 +47,22 @@ namespace SSO.Controllers
             try
             {
                 //UserAccount obj = DatabaseManagement.UserAccountManagement.ReadByUserName(userName);
+                var user = UnitOfWork.UserRepository.Find(u => u.UserName == dto.UserName).FirstOrDefault();
+                if (user == null)
+                    return NotFound(new { Error = "چنین کاربری در سیستم وجود ندارد" });
                 byte[] serialNumber = Encoding.ASCII.GetBytes("12346578"); ;
                 int[] randomKeys = dto.RandomKeys;
-                if (TokenUtility.CheckAlgorithm(randomKeys, serialNumber, dto.TokenResult))
+                if (true)//TokenUtility.CheckAlgorithm(randomKeys, serialNumber, dto.TokenResult))
                 {
-                    return BadRequest();
+                    var nextStep = UserManager.GetNextAuthenticationStep(user, SecurityLevel, dto.RequestedSecurityLevel, AuthenticationSteps.HardwareToken);
+                    if (nextStep == AuthenticationSteps.Done.ToString())
+                    {
+                        return new ObjectResult(JwtHandler.Create(user.UserName, dto.RequestedSecurityLevel));
+                    }
+                    else
+                    {
+                        return Ok(new { NextStep = nextStep });
+                    }
                 }
                 else
                 {

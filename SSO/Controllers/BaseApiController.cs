@@ -51,7 +51,7 @@ namespace SSO.Controllers
         {
             get
             {
-                return UnitOfWork.UserRepository.Find(u => u.UserName == User.Identity.Name).FirstOrDefault().Id;
+                return UnitOfWork.UserRepository.Find(u => u.UserName == User.Identity.Name).FirstOrDefault()?.Id;
             }
         }
     }

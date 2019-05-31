@@ -65,36 +65,36 @@ namespace SSO.Controllers
         [Route("Login")]
         public IActionResult Login(UserCredentialsDto dto)
         {
-            var captchaValidated = CaptchaHelper.ValidateCaptcha(dto.CaptchaKey, dto.UserCaptchaInput);
-            if (captchaValidated == true)
+            try
             {
-                var result = UserManager.VerifyPassword(dto.UserName, dto.Password);
-                if (result == "Failed")
+                var captchaValidated = CaptchaHelper.ValidateCaptcha(dto.CaptchaKey, dto.UserCaptchaInput);
+                if (captchaValidated == true)
                 {
-                    return Unauthorized();
-                }
-                var userId = UnitOfWork.UserRepository.Find(u => u.UserName == dto.UserName).FirstOrDefault()?.Id;
-                AuthenticationStep auth = new AuthenticationStep()
-                {
-                    SecurityLevelId = (int)AuthenticationSteps.Login,
-                    UserId = userId,
-                    CreationDateTime = DateTime.Now
-                };
-                UnitOfWork.AuthenticationStepRepository.Add(auth);
-                UnitOfWork.Complete();
-                var nextStep = UserManager.GetAuthenticationNextStep(SecurityLevel, dto.RequestedSecurityLevel, User.Identity.Name, userId);
-                if (nextStep == AuthenticationSteps.Done.ToString())
-                {
-                    return new ObjectResult(JwtHandler.Create(dto.UserName, dto.RequestedSecurityLevel));
+                    var result = UserManager.VerifyPassword(dto.UserName, dto.Password);
+                    if (result == "Failed")
+                    {
+                        return Unauthorized();
+                    }
+                    var user = UnitOfWork.UserRepository.Find(u => u.UserName == dto.UserName).FirstOrDefault();
+
+                    var nextStep = UserManager.GetNextAuthenticationStep(user, SecurityLevel, dto.RequestedSecurityLevel, AuthenticationSteps.Login);
+                    if (nextStep == AuthenticationSteps.Done.ToString())
+                    {
+                        return new ObjectResult(JwtHandler.Create(user.UserName, dto.RequestedSecurityLevel));
+                    }
+                    else
+                    {
+                        return Ok(new { NextStep = nextStep });
+                    }
                 }
                 else
                 {
-                    return Ok(new { NextStep = nextStep});
+                    return StatusCode(400, new { Error = "کلید تصویر امنیتی معتبر نمی باشد" });
                 }
             }
-            else
+            catch (Exception ex)
             {
-                return StatusCode(400, new { Error = "کلید تصویر امنیتی معتبر نمی باشد" });
+                return StatusCode(500, ex);
             }
         }
         [HttpPost]
@@ -103,14 +103,25 @@ namespace SSO.Controllers
         {
             try
             {
-                var userId = UnitOfWork.UserRepository.Find(u => u.UserName == dto.UserName).FirstOrDefault()?.Id;
-                var nextStep = UserManager.GetAuthenticationNextStep(SecurityLevel, dto.RequestedSecurityLevel, User.Identity.Name, userId);
+                string userId = string.Empty;
+                string userName = string.Empty;
+                if (!string.IsNullOrEmpty(dto.UserName))
+                {
+                    userName = dto.UserName;
+                    userId = UnitOfWork.UserRepository.Find(u => u.UserName == dto.UserName).FirstOrDefault()?.Id;
+                }
+                else if (User != null)
+                {
+                    userId = UnitOfWork.UserRepository.Find(u => u.UserName == User.Identity.Name).FirstOrDefault()?.Id;
+                    userName = User.Identity.Name;
+                }
+                var nextStep = UserManager.GetNextAuthenticationStep(userName, userId, SecurityLevel, dto.RequestedSecurityLevel);
                 return Ok(new { NextStep = nextStep });
 
             }
             catch (Exception ex)
             {
-                return Ok(ex);
+                return StatusCode(500, ex);
             }
         }
         [HttpPost]
@@ -141,7 +152,15 @@ namespace SSO.Controllers
             bool result = UserManager.VerifyVerificationCodeSms(user, dto.Code);
             if (result)
             {
-                return new ObjectResult(JwtHandler.Create(user.UserName, dto.SecurityLevel));
+                var nextStep = UserManager.GetNextAuthenticationStep(user, SecurityLevel, dto.RequestedSecurityLevel, AuthenticationSteps.Mobile);
+                if (nextStep == AuthenticationSteps.Done.ToString())
+                {
+                    return new ObjectResult(JwtHandler.Create(user.UserName, dto.RequestedSecurityLevel));
+                }
+                else
+                {
+                    return Ok(new { NextStep = nextStep });
+                }
             }
             else
                 return StatusCode(400, new { Error = "کد ارسالی مورد تأیید نمی باشد" });

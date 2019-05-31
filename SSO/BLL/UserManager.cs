@@ -119,8 +119,10 @@ namespace SSO.BLL
                 return false;
         }
 
-        public string GetAuthenticationNextStep(int currentSecurityLevel, int requestedSecurityLevel, string userName, string userId)
+        public string GetNextAuthenticationStep(string userName, string userId, int currentSecurityLevel, int requestedSecurityLevel)
         {
+            if (requestedSecurityLevel == 0)
+                requestedSecurityLevel = 1;
             var requestedModes = _UnitOfWork.SecurityLevelModelRepository
                 .Find(s => s.SecurityLevelId == requestedSecurityLevel)
                 .Select(s => s.SecurityModeId)
@@ -134,7 +136,7 @@ namespace SSO.BLL
             var datetime = DateTime.Now.AddMinutes(-5);
             var newlyAuthenticatedSteps = _UnitOfWork.AuthenticationStepRepository
                 .Find(a => a.UserId == userId && a.CreationDateTime >= datetime)
-                .Select(a => a.SecurityLevelId)
+                .Select(a => a.SecurityModeId)
                 .ToList();
 
             var remainingModes = requestedModes
@@ -151,6 +153,19 @@ namespace SSO.BLL
         {
             AuthenticationSteps a = (AuthenticationSteps)index;
             return a.ToString();
+        }
+        public string GetNextAuthenticationStep(User user,int currentSecurityLevel, int requestedSecurityLevel, AuthenticationSteps step)
+        {
+            AuthenticationStep auth = new AuthenticationStep()
+            {
+                SecurityModeId = (int)step,
+                UserId = user.Id,
+                CreationDateTime = DateTime.Now
+            };
+            _UnitOfWork.AuthenticationStepRepository.Add(auth);
+            _UnitOfWork.Complete();
+            var nextStep = GetNextAuthenticationStep(user.UserName, user.Id, currentSecurityLevel, requestedSecurityLevel);
+            return nextStep;
         }
     }
 }

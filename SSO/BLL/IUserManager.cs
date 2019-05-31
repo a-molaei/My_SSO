@@ -1,4 +1,5 @@
-﻿using SSO.Models;
+﻿using SSO.Helper.CommonData;
+using SSO.Models;
 using SSO.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,8 @@ namespace SSO.BLL
         bool ChangeSecurityStamp(User user);
         bool SendVerificationCodeSms(User user);
         bool VerifyVerificationCodeSms(User user, string code);
-        string GetAuthenticationNextStep(int currentSecurityLevel, int requestedSecurityLeve, string userName, string userId);
+        string GetNextAuthenticationStep(string userName, string userId, int currentSecurityLevel, int requestedSecurityLeve);
+        string GetNextAuthenticationStep(User user, int currentSecurityLevel, int requestedSecurityLevel, AuthenticationSteps step);
         string GetAuthenticationStepNameByIndex(int index);
 
 

@@ -16,9 +16,9 @@ namespace SSO.Models.ModelConfigurations
                 .WithMany()
                 .HasForeignKey(b => b.UserId);
 
-            builder.HasOne(b => b.SecurityLevel)
+            builder.HasOne(b => b.SecurityMode)
                 .WithMany()
-                .HasForeignKey(b => b.SecurityLevelId);
+                .HasForeignKey(b => b.SecurityModeId);
         }
     }
 }
