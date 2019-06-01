@@ -11,6 +11,8 @@ using SSO.Helper.Captcha;
 using SSO.ViewModels.Captcha;
 using SSO.Helper.CommonData;
 using SSO.Models;
+using SSO.Helper.Converter;
+using SSO.ViewModels.PasswordRecovery;
 
 namespace SSO.Controllers
 {
@@ -172,6 +174,47 @@ namespace SSO.Controllers
             CaptchaResponseDto dto = new CaptchaResponseDto();
             dto = CaptchaHelper.GenerateCaptcha();
             return Ok(dto);
+        }
+
+        [HttpGet]
+        [Route("GetEmailByNationalCode/{nationalCode}")]
+        public IActionResult GetEmailByNationalCode(string nationalCode)
+        {
+            // get email from person server
+            var testEmail = "molaie.amir@gmail.com";
+            var incompleteAddress = EmailHelper.ConvertToIncompleteAddress(testEmail);
+            var encrypted = CryptographyHelper.Crypt(testEmail);
+            EmailEncryptedAndIncompleteDto dto = new EmailEncryptedAndIncompleteDto()
+            {
+                IncompleteEmail = incompleteAddress,
+                EncrypedEmail = encrypted
+            };
+            return Ok(dto);
+        }
+
+        [HttpGet]
+        [Route("GetMobileNumbersByNationalCode/{nationalCode}")]
+        public IActionResult GetMobileNumbersByNationalCode(string nationalCode)
+        {
+            // get email from person server
+            var testMobiles = new List<string>()
+            {"09132920196",
+            "09334567897",
+            "09109396262"
+            };
+            var result = testMobiles.Select(MobileHelper.GetEncryptedAndIncompleteMobile);
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("ForgotPassword")]
+        public IActionResult ForgotPassword(ForgotPasswordDto dto)
+        {
+            var decryptedEmail = CryptographyHelper.Decrypt(dto.EncryptedEmail);
+            var decryptedMobileNumber = CryptographyHelper.Decrypt(dto.EncryptedMobileNumber);
+            // send to email
+            // send to mobile
+            return Ok();
         }
     }
 }
