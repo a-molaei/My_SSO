@@ -99,6 +99,7 @@ namespace SSO.Controllers
                         return Unauthorized(new { Error = "نام کاربری یا کلمه عبور اشتباه است" });
                     }
                     UserManager.UnlockUser(user);
+
                     var nextStep = UserManager.GetNextAuthenticationStep(user, SecurityLevel, dto.RequestedSecurityLevel, AuthenticationSteps.Login);
                     if (nextStep == AuthenticationSteps.Done.ToString())
                     {
@@ -250,6 +251,15 @@ namespace SSO.Controllers
             {
                 return StatusCode(500, ex);
             }
+        }
+        [Authorize]
+        [HttpGet]
+        [Route("RefreshToken")]
+        public IActionResult RefreshToken()
+        {
+            if (User?.Identity?.Name == null)
+                return Unauthorized();
+            return new ObjectResult(JwtHandler.Create(User.Identity.Name, SecurityLevel));
         }
     }
 }

@@ -205,5 +205,13 @@ namespace SSO.BLL
             user.LockOutEndDate = null;
             user.AccessFailedCount = 0;
         }
+
+        public bool IsForcedToChangePassword(User user, Setting setting)
+        {
+            return true;
+           // var passwordExpiration = user.LastPasswordChangeDateTime.
+            //if(user.LastPasswordChangeDateTime <)
+        }
+
     }
 }

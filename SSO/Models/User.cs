@@ -22,8 +22,8 @@ namespace SSO.Models
         public int AccessFailedCount { get; set; }
         public bool LockOutEnabled { get; set; }
         public DateTime? LockOutEndDate { get; set; }
-        public DateTime? LastPasswordChangeDateTime { get; set; }
-        public DateTime? ForcePasswordChangeDateTime { get; set; }
+        public DateTime LastPasswordChangeDateTime { get; set; }
+        public bool ForcePasswordChange { get; set; }
         public DateTime CreationDateTime { get; set; }
         public virtual ICollection<UserRole> UserRoles { get; set; }
         public virtual ICollection<UserRestrictedIp> UserRestrictedIps { get; set; }
