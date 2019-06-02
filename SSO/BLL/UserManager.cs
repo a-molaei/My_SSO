@@ -167,5 +167,43 @@ namespace SSO.BLL
             var nextStep = GetNextAuthenticationStep(user.UserName, user.Id, currentSecurityLevel, requestedSecurityLevel);
             return nextStep;
         }
+
+        public bool IsUserLocked(User user)
+        {
+            if (user.LockOutEnabled && DateTime.Now <= user.LockOutEndDate)
+                return true;
+            else if(user.LockOutEnabled && DateTime.Now > user.LockOutEndDate)
+            {
+                UnlockUser(user);
+                return false;
+            }
+            return false;
+        }
+
+        public void IncreaseUserFailedPasswordCount(User user)
+        {
+            user.AccessFailedCount = user.AccessFailedCount + 1;
+        }
+
+        public bool HasUserPassedMaxFailedPasswordCount(User user, Setting setting)
+        {
+            if (user.AccessFailedCount >= setting.MaxFailedPasswordCount)
+                return true;
+            else
+                return false;
+        }
+
+        public void LockUser(User user, Setting setting)
+        {
+            user.LockOutEndDate = DateTime.Now.AddMinutes(setting.LockOutDuration);
+            user.LockOutEnabled = true;
+        }
+
+        public void UnlockUser(User user)
+        {
+            user.LockOutEnabled = false;
+            user.LockOutEndDate = null;
+            user.AccessFailedCount = 0;
+        }
     }
 }

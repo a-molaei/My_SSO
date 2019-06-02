@@ -72,13 +72,33 @@ namespace SSO.Controllers
                 var captchaValidated = CaptchaHelper.ValidateCaptcha(dto.CaptchaKey, dto.UserCaptchaInput);
                 if (captchaValidated == true)
                 {
+                    var setting = UnitOfWork.SettingRepository.GetAll().FirstOrDefault();
+                    if(setting == null)
+                    {
+                        return StatusCode(500, new { Error = "تنظیمات سیستم تعریف نشده است" });
+                    }
+
+                    var user = UnitOfWork.UserRepository.Find(u => u.UserName == dto.UserName).FirstOrDefault();
+                    if (user == null)
+                        return Unauthorized(new { Error = "نام کاربری یا کلمه عبور اشتباه است"});
+                    if(UserManager.IsUserLocked(user))
+                    {
+                        return Unauthorized(new { Error = "حساب کاربری شما به علت وارد کردن رمز عبور اشتباه بیش از حد مجاز برای دقایقی مسدود شده است." });
+                    }
                     var result = UserManager.VerifyPassword(dto.UserName, dto.Password);
                     if (result == "Failed")
                     {
-                        return Unauthorized();
+                        UserManager.IncreaseUserFailedPasswordCount(user);
+                        if (UserManager.HasUserPassedMaxFailedPasswordCount(user, setting))
+                        {
+                            UserManager.LockUser(user, setting);
+                            UnitOfWork.Complete();
+                            return Unauthorized(new { Error = "حساب کاربری شما به علت وارد کردن رمز عبور اشتباه بیش از حد مجاز برای دقایقی مسدود شده است." });
+                        }
+                        UnitOfWork.Complete();
+                        return Unauthorized(new { Error = "نام کاربری یا کلمه عبور اشتباه است" });
                     }
-                    var user = UnitOfWork.UserRepository.Find(u => u.UserName == dto.UserName).FirstOrDefault();
-
+                    UserManager.UnlockUser(user);
                     var nextStep = UserManager.GetNextAuthenticationStep(user, SecurityLevel, dto.RequestedSecurityLevel, AuthenticationSteps.Login);
                     if (nextStep == AuthenticationSteps.Done.ToString())
                     {
@@ -210,11 +230,26 @@ namespace SSO.Controllers
         [Route("ForgotPassword")]
         public IActionResult ForgotPassword(ForgotPasswordDto dto)
         {
-            var decryptedEmail = CryptographyHelper.Decrypt(dto.EncryptedEmail);
-            var decryptedMobileNumber = CryptographyHelper.Decrypt(dto.EncryptedMobileNumber);
-            // send to email
-            // send to mobile
-            return Ok();
+            try
+            {
+                var captchaValidated = CaptchaHelper.ValidateCaptcha(dto.CaptchaKey, dto.UserCaptchaInput);
+                if (captchaValidated == true)
+                {
+                    var decryptedEmail = CryptographyHelper.Decrypt(dto.EncryptedEmail);
+                    var decryptedMobileNumber = CryptographyHelper.Decrypt(dto.EncryptedMobileNumber);
+                    // send to email
+                    // send to mobile
+                    return Ok();
+                }
+                else
+                {
+                    return StatusCode(400, new { Error = "کلید تصویر امنیتی معتبر نمی باشد" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
         }
     }
 }

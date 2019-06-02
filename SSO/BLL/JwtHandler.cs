@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SSO.Helper.Extensions;
+using SSO.UoW;
 using SSO.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -20,11 +21,13 @@ namespace SSO.BLL
         private SecurityKey _issuerSigningKey;
         private SigningCredentials _signingCredentials;
         private JwtHeader _jwtHeader;
+        private IUnitOfWork _unitOfWork;
         public TokenValidationParameters Parameters { get; private set; }
 
-        public JwtHandler(IOptions<JwtSettings> settings)
+        public JwtHandler(IOptions<JwtSettings> settings, IUnitOfWork unitOfWork)
         {
             _settings = settings.Value;
+            _unitOfWork = unitOfWork;
             if (_settings.UseRsa)
             {
                 InitializeRsa();
@@ -83,7 +86,8 @@ namespace SSO.BLL
         public JWT Create(string userId, int securityLevel)
         {
             var nowUtc = DateTime.UtcNow;
-            var expires = nowUtc.AddDays(_settings.ExpiryDays);
+            var expiryMinutes = _unitOfWork.SettingRepository.GetAll().FirstOrDefault()?.TokenExpirationDuration ?? 15;
+            var expires = nowUtc.AddMinutes(expiryMinutes);
             var centuryBegin = new DateTime(1970, 1, 1);
             var exp = (long)(new TimeSpan(expires.Ticks - centuryBegin.Ticks).TotalSeconds);
             var now = (long)(new TimeSpan(nowUtc.Ticks - centuryBegin.Ticks).TotalSeconds);

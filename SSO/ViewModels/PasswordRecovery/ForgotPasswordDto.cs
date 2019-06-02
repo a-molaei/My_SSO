@@ -10,5 +10,7 @@ namespace SSO.ViewModels.PasswordRecovery
         public string NationalCode { get; set; }
         public string EncryptedEmail { get; set; }
         public string EncryptedMobileNumber { get; set; }
+        public string CaptchaKey { get; set; }
+        public string UserCaptchaInput { get; set; }
     }
 }

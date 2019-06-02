@@ -40,7 +40,7 @@ namespace SSO
             services.AddTransient<ILazyLoader, LazyLoader>();
 
             services.Configure<JwtSettings>(Configuration.GetSection("jwt"));
-            services.AddSingleton<IJwtHandler, JwtHandler>();
+            services.AddTransient<IJwtHandler, JwtHandler>();
 
             var sp = services.BuildServiceProvider();
             var jwtHandler = sp.GetService<IJwtHandler>();
