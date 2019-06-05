@@ -14,7 +14,7 @@ using SSO.Models;
 using SSO.Helper.Converter;
 using SSO.ViewModels.PasswordRecovery;
 using SSO.ViewModels.JwtToken;
-using SSO.Helper.NationalCode;
+using SSO.Helper.Validators;
 
 namespace SSO.Controllers
 {
@@ -41,9 +41,9 @@ namespace SSO.Controllers
                     var user = UnitOfWork.UserRepository.Find(u => u.UserName == dto.UserName).FirstOrDefault();
                     if (user == null)
                     {
-                        if (!UserManager.CheckPasswordComplexity(dto.Password))
+                        if (!CustomValidator.CheckPasswordComplexity(dto.Password))
                             return BadRequest(new { Error = "رمز عبور باید حداقل 8 کاراکتر و ترکیبی از اعداد و حروف باشد" });
-                        if (!NationalCodeValidator.Validate(dto.UserName))
+                        if (!CustomValidator.ValidateNationalCode(dto.UserName))
                             return BadRequest(new { Error = "کد ملی معتبر نمی باشد" });
                         var result = UserManager.CreateUser(dto);
                     }
@@ -182,7 +182,6 @@ namespace SSO.Controllers
         public IActionResult SendVerificationCodeSms(MobileVerificationDto dto)
         {
             var mobileNumber = CryptographyHelper.Decrypt(dto.EncryptedMobileNumber);
-            // Mobile Validator
             var user = UnitOfWork.UserRepository.Find(u => u.MobileNumber == mobileNumber).FirstOrDefault();
             if (user == null)
                 return NotFound();
@@ -200,7 +199,6 @@ namespace SSO.Controllers
         public IActionResult VerifyVerificationCodeSms(MobileVerificationDto dto)
         {
             var mobileNumber = CryptographyHelper.Decrypt(dto.EncryptedMobileNumber);
-            // Mobile Validator
             var user = UnitOfWork.UserRepository.Find(u => u.MobileNumber == mobileNumber).FirstOrDefault();
             if (user == null)
                 return NotFound();
@@ -249,7 +247,7 @@ namespace SSO.Controllers
         [Route("GetMobileNumbersByNationalCode/{nationalCode}")]
         public IActionResult GetMobileNumbersByNationalCode(string nationalCode)
         {
-            // get email from person server
+            // get mobile numbers from person server
             var testMobiles = new List<string>()
             {"09132920196",
             "09334567897",
@@ -292,6 +290,65 @@ namespace SSO.Controllers
             if (User?.Identity?.Name == null)
                 return Unauthorized();
             return new ObjectResult(JwtHandler.Create(User.Identity.Name, SecurityLevel, dto.ApplicationId, 0));
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("HasMobileNumber")]
+        public IActionResult HasMobileNumber()
+        {
+            // User token to find person
+
+            // Check if person has mobile number
+
+            return Ok(new { Result = true });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("SendCodeToCreateFirstMobileNumber")]
+        public IActionResult SendCodeToCreateFirstMobileNumber(CreateFirstMobileNumberDto dto)
+        {
+            if (!CustomValidator.ValidateMobileNumber(dto.MobileNumber))
+            {
+                return StatusCode(400, new { Error = "شماره موبایل نامعتبر می باشد. نمونه صحیح: 09131234567" });
+            }
+
+            // Check if mobile number exists
+
+            var user = UnitOfWork.UserRepository.Find(u => u.MobileNumber == dto.MobileNumber).FirstOrDefault();
+            if (user == null)
+                return NotFound();
+            bool result = UserManager.SendVerificationCodeSms(user);
+            if (result)
+            {
+                return Ok();
+            }
+            else
+                return StatusCode(500, new { Error = "خطا در ارسال پیامک" });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("VerifyCodeToCreateFirstMobileNumber")]
+        public IActionResult VerifyCodeToCreateFirstMobileNumber(CreateFirstMobileNumberDto dto)
+        {
+            var user = UnitOfWork.UserRepository.Find(u => u.MobileNumber == dto.MobileNumber).FirstOrDefault();
+            if (user == null)
+                return NotFound();
+            bool result = UserManager.VerifyVerificationCodeSms(user, dto.Code);
+            if (result)
+            {
+
+                // User token to find person
+
+                // Create mobile number in person
+
+                return Ok();
+
+            }
+            else
+                return StatusCode(400, new { Error = "کد ارسالی مورد تأیید نمی باشد" });
         }
     }
 }

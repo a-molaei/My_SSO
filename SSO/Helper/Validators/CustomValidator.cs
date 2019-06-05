@@ -3,11 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SSO.Helper.NationalCode
+namespace SSO.Helper.Validators
 {
-    public static class NationalCodeValidator
+    public static class CustomValidator
     {
-        public static bool Validate(string nationalCode)
+        public static bool ValidateMobileNumber(string mobileNumber)
+        {
+            if (mobileNumber.Length != 11)
+            {
+                return false;
+            }
+            if (mobileNumber.Substring(0, 1) != "0")
+            {
+                return false;
+            }
+            if (!new System.Text.RegularExpressions.Regex(@"^\d+$").IsMatch(mobileNumber))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool ValidateNationalCode(string nationalCode)
         {
             try
             {
@@ -41,5 +58,15 @@ namespace SSO.Helper.NationalCode
                 return false;
             }
         }
+
+        public static bool CheckPasswordComplexity(string password)
+        {
+            var rule1 = password.Any(char.IsLetter);
+            var rule2 = password.Any(char.IsNumber);
+            var rule3 = password.Length >= 8;
+            var res = (rule1 && rule2 && rule3);
+            return res;
+        }
+
     }
 }

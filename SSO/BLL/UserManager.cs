@@ -213,13 +213,6 @@ namespace SSO.BLL
             //if(user.LastPasswordChangeDateTime <)
         }
 
-        public bool CheckPasswordComplexity(string password)
-        {
-            var rule1 = password.Any(char.IsLetter);
-            var rule2 = password.Any(char.IsNumber);
-            var rule3 = password.Length >= 8;
-            var res = (rule1 && rule2 && rule3);
-            return res;
-        }
+
     }
 }
