@@ -57,11 +57,11 @@ namespace SSO.Controllers
                     var nextStep = UserManager.GetNextAuthenticationStep(user, SecurityLevel, dto.RequestedSecurityLevel, AuthenticationSteps.HardwareToken);
                     if (nextStep == AuthenticationSteps.Done.ToString())
                     {
-                        return new ObjectResult(JwtHandler.Create(user.UserName, dto.RequestedSecurityLevel));
+                        return new ObjectResult(JwtHandler.Create(user.UserName, dto.RequestedSecurityLevel, dto.ApplicationId, dto.PageId));
                     }
                     else
                     {
-                        return Ok(new { NextStep = nextStep });
+                        return Ok(new { NextRoute = nextStep });
                     }
                 }
                 else

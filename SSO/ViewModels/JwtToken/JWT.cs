@@ -9,5 +9,6 @@ namespace SSO.ViewModels
     {
         public string Access_Token { get; set; }
         public long Expires { get; set; }
+        public int PageId { get; set; }
     }
 }

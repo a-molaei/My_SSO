@@ -13,6 +13,7 @@ namespace SSO.Models.ModelConfigurations
         {
             builder.ToTable("Application", "SSO");
             builder.Property(b => b.Title).HasMaxLength(50);
+            builder.Property(b => b.Url).HasMaxLength(100);
         }
     }
 }

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SSO.Models.SsoDbContext;
 
 namespace SSO.Migrations
 {
     [DbContext(typeof(SsoDbContext))]
-    partial class SsoDbContextModelSnapshot : ModelSnapshot
+    [Migration("13980315080304_urlAddedToApplication")]
+    partial class urlAddedToApplication
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

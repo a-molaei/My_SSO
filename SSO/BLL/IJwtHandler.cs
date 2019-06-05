@@ -9,7 +9,7 @@ namespace SSO.BLL
 {
     public interface IJwtHandler
     {
-        JWT Create(string userId, int securityLevel);
+        JWT Create(string userId, int securityLevel, int applicationId, int pageId);
         TokenValidationParameters Parameters { get; }
     }
 }

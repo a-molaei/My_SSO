@@ -83,7 +83,7 @@ namespace SSO.BLL
             };
         }
 
-        public JWT Create(string userId, int securityLevel)
+        public JWT Create(string userId, int securityLevel, int applicationId, int pageId)
         {
             var nowUtc = DateTime.UtcNow;
             var expiryMinutes = _unitOfWork.SettingRepository.GetAll().FirstOrDefault()?.TokenExpirationDuration ?? 15;
@@ -97,6 +97,7 @@ namespace SSO.BLL
                 {"sub", userId},
                 {"unique_name", userId},
                 {"security_level", securityLevel},
+                {"application_id", applicationId},
                 {"iss", issuer},
                 {"iat", now},
                 {"nbf", now},
@@ -109,7 +110,8 @@ namespace SSO.BLL
             return new JWT
             {
                 Access_Token = token,
-                Expires = exp
+                Expires = exp,
+                PageId = pageId
             };
         }
     }

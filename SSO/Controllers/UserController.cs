@@ -13,6 +13,8 @@ using SSO.Helper.CommonData;
 using SSO.Models;
 using SSO.Helper.Converter;
 using SSO.ViewModels.PasswordRecovery;
+using SSO.ViewModels.JwtToken;
+using SSO.Helper.NationalCode;
 
 namespace SSO.Controllers
 {
@@ -30,8 +32,36 @@ namespace SSO.Controllers
         [Route("Create")]
         public IActionResult Create(UserCreateDto dto)
         {
-            var result = UserManager.CreateUser(dto);
-            return new ObjectResult(result);
+            try
+            {
+                var captchaValidated = CaptchaHelper.ValidateCaptcha(dto.CaptchaKey, dto.UserCaptchaInput);
+                if (captchaValidated == true)
+                {
+                    //Create Person if not exists
+                    var user = UnitOfWork.UserRepository.Find(u => u.UserName == dto.UserName).FirstOrDefault();
+                    if (user == null)
+                    {
+                        if (!UserManager.CheckPasswordComplexity(dto.Password))
+                            return BadRequest(new { Error = "رمز عبور باید حداقل 8 کاراکتر و ترکیبی از اعداد و حروف باشد" });
+                        if (!NationalCodeValidator.Validate(dto.UserName))
+                            return BadRequest(new { Error = "کد ملی معتبر نمی باشد" });
+                        var result = UserManager.CreateUser(dto);
+                    }
+                    else
+                    {
+                        //////////
+                    }
+                    return Ok();
+                }
+                else
+                {
+                    return StatusCode(400, new { Error = "کلید تصویر امنیتی معتبر نمی باشد" });
+                }
+            }
+            catch(Exception ex)
+            {
+                return Content(ex.Message);
+            }
         }
         [HttpPut]
         [Authorize]
@@ -103,11 +133,11 @@ namespace SSO.Controllers
                     var nextStep = UserManager.GetNextAuthenticationStep(user, SecurityLevel, dto.RequestedSecurityLevel, AuthenticationSteps.Login);
                     if (nextStep == AuthenticationSteps.Done.ToString())
                     {
-                        return new ObjectResult(JwtHandler.Create(user.UserName, dto.RequestedSecurityLevel));
+                        return new ObjectResult(JwtHandler.Create(user.UserName, dto.RequestedSecurityLevel, dto.ApplicationId, dto.PageId));
                     }
                     else
                     {
-                        return Ok(new { NextStep = nextStep });
+                        return Ok(new { NextRoute = nextStep });
                     }
                 }
                 else
@@ -139,7 +169,7 @@ namespace SSO.Controllers
                     userName = User.Identity.Name;
                 }
                 var nextStep = UserManager.GetNextAuthenticationStep(userName, userId, SecurityLevel, dto.RequestedSecurityLevel);
-                return Ok(new { NextStep = nextStep });
+                return Ok(new { NextRoute = nextStep });
 
             }
             catch (Exception ex)
@@ -151,8 +181,9 @@ namespace SSO.Controllers
         [Route("SendVerificationCodeSms")]
         public IActionResult SendVerificationCodeSms(MobileVerificationDto dto)
         {
+            var mobileNumber = CryptographyHelper.Decrypt(dto.EncryptedMobileNumber);
             // Mobile Validator
-            var user = UnitOfWork.UserRepository.Find(u => u.MobileNumber == dto.MobileNumber).FirstOrDefault();
+            var user = UnitOfWork.UserRepository.Find(u => u.MobileNumber == mobileNumber).FirstOrDefault();
             if (user == null)
                 return NotFound();
             bool result = UserManager.SendVerificationCodeSms(user);
@@ -168,8 +199,9 @@ namespace SSO.Controllers
         [Route("VerifyVerificationCodeSms")]
         public IActionResult VerifyVerificationCodeSms(MobileVerificationDto dto)
         {
+            var mobileNumber = CryptographyHelper.Decrypt(dto.EncryptedMobileNumber);
             // Mobile Validator
-            var user = UnitOfWork.UserRepository.Find(u => u.MobileNumber == dto.MobileNumber).FirstOrDefault();
+            var user = UnitOfWork.UserRepository.Find(u => u.MobileNumber == mobileNumber).FirstOrDefault();
             if (user == null)
                 return NotFound();
             bool result = UserManager.VerifyVerificationCodeSms(user, dto.Code);
@@ -178,11 +210,11 @@ namespace SSO.Controllers
                 var nextStep = UserManager.GetNextAuthenticationStep(user, SecurityLevel, dto.RequestedSecurityLevel, AuthenticationSteps.Mobile);
                 if (nextStep == AuthenticationSteps.Done.ToString())
                 {
-                    return new ObjectResult(JwtHandler.Create(user.UserName, dto.RequestedSecurityLevel));
+                    return new ObjectResult(JwtHandler.Create(user.UserName, dto.RequestedSecurityLevel, dto.ApplicationId, dto.PageId));
                 }
                 else
                 {
-                    return Ok(new { NextStep = nextStep });
+                    return Ok(new { NextRoute = nextStep });
                 }
             }
             else
@@ -255,11 +287,11 @@ namespace SSO.Controllers
         [Authorize]
         [HttpGet]
         [Route("RefreshToken")]
-        public IActionResult RefreshToken()
+        public IActionResult RefreshToken(RefreshTokenDto dto)
         {
             if (User?.Identity?.Name == null)
                 return Unauthorized();
-            return new ObjectResult(JwtHandler.Create(User.Identity.Name, SecurityLevel));
+            return new ObjectResult(JwtHandler.Create(User.Identity.Name, SecurityLevel, dto.ApplicationId, 0));
         }
     }
 }

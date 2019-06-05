@@ -25,5 +25,6 @@ namespace SSO.BLL
         void LockUser(User user, Setting setting);
         void UnlockUser(User user);
         bool IsForcedToChangePassword(User user, Setting setting);
+        bool CheckPasswordComplexity(string password);
     }
 }
